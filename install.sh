@@ -34,6 +34,12 @@ XT_ROLE="xtrole"
 XT_ADMIN="admin"
 XT_ADMIN_PASS="admin"
 
+echo "xTuple PostgreSQL Setup Script (for RHEL 8.x systems)"
+echo "DF Supply, Inc."
+echo ""
+echo "PostgreSQL version $PG_VER on port $PG_PORT"
+echo "$XT_ADMIN / $XT_ADMIN_PASS / $XT_ROLE"
+
 echo "Switch PostgreSQL streams and install"
 yum update -y
 yum module reset postgresql -y
