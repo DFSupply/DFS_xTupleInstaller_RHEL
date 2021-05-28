@@ -47,7 +47,7 @@ postgresql-setup initdb
 echo "PLV8 compilation prereqs"
 subscription-manager repos --enable=codeready-builder-for-rhel-8-x86_64-rpms
 yum update -y
-yum install git python2 python3 gcc pkg-config ninja-build make ncurses-compat-libs redhat-rpm-config clang cmake llvm-devel libatomic -y
+yum install git python2 python3 gcc pkg-config ninja-build make ncurses-compat-libs redhat-rpm-config clang cmake llvm-devel libatomic libstdc++ -y
 # need python 2 for compilation
 alternatives --set python /usr/bin/python2
 
@@ -55,7 +55,7 @@ echo "Compiling libc++abi"
 git clone https://github.com/llvm/llvm-project.git llvm-project
 cd llvm-project
 mkdir build && cd build
-cmake -DLLVM_ENABLE_PROJECTS=libcxxabi ../llvm  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DLLVM_INCLUDE_TESTS=OFF
+cmake -DLLVM_ENABLE_PROJECTS=libcxxabi ../llvm  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DLLVM_INCLUDE_TESTS=OFF
 make
 
 cd ../../
