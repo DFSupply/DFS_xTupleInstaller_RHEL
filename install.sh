@@ -90,3 +90,7 @@ cd plv8-2.3.15 || exit
 make || exit
 make install || exit
 cd ../ || exit
+
+echo "Linking to LD Library"
+echo "/usr/local/lib/" > /etc/ld.so.conf.d/plv8.conf.d || exit
+ldconfig
