@@ -28,11 +28,11 @@ fi
 
 
 # 10, 12, and 13 available in official REPO as of 5/27/2021
-PG_VER=13
-PG_PORT=5434
-XT_ROLE=xtrole
-XT_ADMIN=admin
-XT_ADMIN_PASS=admin
+PG_VER="13"
+PG_PORT="5434"
+XT_ROLE="xtrole"
+XT_ADMIN="admin"
+XT_ADMIN_PASS="admin"
 
 echo "Switch PostgreSQL streams and install"
 yum update -y
@@ -54,32 +54,33 @@ alternatives --set python /usr/bin/python2
 
 echo "Compiling libcxx"
 git clone -b llvmorg-12.0.0 https://github.com/llvm/llvm-project.git llvm-project
-cd llvm-project
-cd libcxx
-mkdir build && cd build
+cd llvm-project || exit
+cd libcxx || exit
+mkdir build && cd build || exit
 cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 make
-cd ../../
+cd ../../ || exit
 
 echo "Compiling libcxxabi"
-cd libcxxabi
-mkdir build && cd build
+cd libcxxabi || exit
+mkdir build && cd build || exit
 cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libstdc++ -DLIBCXXABI_LIBCXX_INCLUDES=../../libcxx/include
 make
 make install
-cd ../../
+cd ../../ || exit
 
 echo "Compiling libcxx again w/ libcxxabi"
-cd libcxx
+cd libcxx || exit
 rm -Rf build
-mkdir build && cd build
+mkdir build && cd build || exit
 cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_CXX_ABI_INCLUDE_PATHS=../../libcxxabi/include
 make
 make install
-cd ../../../
+cd ../../../ || exit
 
 echo "Compiling PLV8"
 git clone -b v2.3.15 https://github.com/plv8/plv8.git plv8-2.3.15
-cd plv8-2.3.15
+cd plv8-2.3.15 || exit
 make
 make install
+cd ../ || exit
