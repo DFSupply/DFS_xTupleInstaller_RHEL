@@ -25,7 +25,7 @@ chmod +x install.sh
 ./install.sh
 ```
 
-PostgreSQL will be running on the port you requested
+PostgreSQL will be running on the port you requested.
 You will need to import the plv8 extension that was created.
 ```
 psql -U postgres
