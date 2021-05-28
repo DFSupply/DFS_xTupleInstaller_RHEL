@@ -1,16 +1,19 @@
 #!/bin/bash
+#
+# RHEL8 xTuple Installer
+#
+# DF Supply, Inc.
+# 05/27/2021
 
 # WARNING NOT FINISHED!!!!
 # DO NOT USE IN PRODUCTION
-
+#
 # Requires:
 # Red Hat Enterprise Linux 8.x
-# A working internet connection.
-# If behind a firewall, open up ports 22,5434
-
-# Questions/Errors? Contact Perry Clark - pclark@xtuple.com - 757-461-3022 x107
-# Modified for RHEL 8 by Scott D Moore @ DF Supply - scott@dfsupplyinc.com
-
+#
+# Built for RHEL 8 by Scott D Moore @ DF Supply - scott@dfsupplyinc.com
+# Parts of this script are based on the work of Perry Clark @ xTuple - pclark@xtuple.com
+#
 # Notes:
 # This only installs official Red Hat repo versions of PostgreSQL
 # PLV8 will be compiled during install
@@ -42,6 +45,14 @@ echo "DF Supply, Inc."
 echo ""
 echo "PostgreSQL version $PG_VER on port $PG_PORT"
 echo "$XT_ADMIN / $XT_ADMIN_PASS / $XT_ROLE"
+
+echo ""
+echo "Please confirm you wish to proceed? (y/n)"
+read -r
+if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+	echo "Cancelling..."
+	exit 1
+fi
 
 echo "Switching PostgreSQL streams and installing..."
 yum update -y
