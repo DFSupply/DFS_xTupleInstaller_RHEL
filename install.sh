@@ -51,17 +51,34 @@ yum install git python2 python3 gcc pkg-config ninja-build make ncurses-compat-l
 # need python 2 for compilation
 alternatives --set python /usr/bin/python2
 
-echo "Compiling libc++abi"
-git clone https://github.com/llvm/llvm-project.git llvm-project
-cd llvm-project
-mkdir build && cd build
-cmake -DLLVM_ENABLE_PROJECTS=libcxxabi ../llvm  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DLLVM_INCLUDE_TESTS=OFF
-make
 
+echo "Compiling libcxx"
+git clone -b llvmorg-12.0.0 https://github.com/llvm/llvm-project.git llvm-project
+cd llvm-project
+cd libcxx
+mkdir build && cd build
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+make
 cd ../../
 
+echo "Compiling libcxxabi"
+cd libcxxabi
+mkdir build && cd build
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libstdc++ -DLIBCXXABI_LIBCXX_INCLUDES=../../libcxx/include
+make
+make install
+cd ../../
+
+echo "Compiling libcxx again w/ libcxxabi"
+cd libcxx
+rm -Rf build
+mkdir build && cd build
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_CXX_ABI_INCLUDE_PATHS=../../libcxxabi/include
+make
+make install
+cd ../../../
+
 echo "Compiling PLV8"
-wget https://github.com/plv8/plv8/archive/v2.3.15.tar.gz
-tar -xzvf v2.3.15.tar.gz
+git clone -b v2.3.15 https://github.com/plv8/plv8.git plv8-2.3.15
 cd plv8-2.3.15
 make
