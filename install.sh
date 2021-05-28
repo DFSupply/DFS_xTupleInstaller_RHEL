@@ -82,3 +82,4 @@ echo "Compiling PLV8"
 git clone -b v2.3.15 https://github.com/plv8/plv8.git plv8-2.3.15
 cd plv8-2.3.15
 make
+make install
