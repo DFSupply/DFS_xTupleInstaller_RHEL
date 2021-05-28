@@ -63,30 +63,30 @@ git clone -b llvmorg-12.0.0 https://github.com/llvm/llvm-project.git llvm-projec
 cd llvm-project || exit
 cd libcxx || exit
 mkdir build && cd build || exit
-cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
-make
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ || exit
+make || exit
 cd ../../ || exit
 
 echo "Compiling libcxxabi"
 cd libcxxabi || exit
 mkdir build && cd build || exit
-cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libstdc++ -DLIBCXXABI_LIBCXX_INCLUDES=../../libcxx/include
-make
-make install
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libstdc++ -DLIBCXXABI_LIBCXX_INCLUDES=../../libcxx/include || exit
+make || exit
+make install || exit
 cd ../../ || exit
 
 echo "Compiling libcxx again w/ libcxxabi"
 cd libcxx || exit
 rm -Rf build
 mkdir build && cd build || exit
-cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_CXX_ABI_INCLUDE_PATHS=../../libcxxabi/include
-make
-make install
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_CXX_ABI_INCLUDE_PATHS=../../libcxxabi/include || exit
+make || exit
+make install || exit
 cd ../../../ || exit
 
 echo "Compiling PLV8"
 git clone -b v2.3.15 https://github.com/plv8/plv8.git plv8-2.3.15
 cd plv8-2.3.15 || exit
-make
-make install
+make || exit
+make install || exit
 cd ../ || exit
