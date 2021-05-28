@@ -39,6 +39,8 @@ PG_PORT="5434"
 XT_ROLE="xtrole"
 XT_ADMIN="admin"
 XT_ADMIN_PASS="admin"
+POSTGRES_ACCTPASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -n 1)
+
 
 echo "xTuple PostgreSQL Setup Script (for RHEL 8.x systems)"
 echo "DF Supply, Inc."
@@ -108,3 +110,48 @@ cd ../ || exit
 echo "Linking to LD Library..."
 echo "/usr/local/lib/" > /etc/ld.so.conf.d/plv8.conf.d || exit
 ldconfig
+
+echo "Overwriting the pg_hba.conf configuration"
+echo  "
+local      all             postgres                        trust
+local      replication     all                             peer
+host       replication     all             127.0.0.1/32    ident
+host       replication     all             ::1/128         ident
+host       all             postgres        0.0.0.0/0       reject
+hostssl    all             postgres        0.0.0.0/0       reject
+hostnossl  all             all             0.0.0.0/0       reject
+hostssl    all             +xtrole         0.0.0.0/0       md5" > /var/lib/pgsql/data/pg_hba.conf
+
+echo "Setting xTuple plv8 configuration in postgresql.conf..."
+echo  "
+max_locks_per_transaction = 256
+plv8.start_proc='xt.js_init'"  >> /var/lib/pgsql/data/postgresql.conf
+
+chpasswd <<< "postgres:$POSTGRES_ACCTPASSWORD"
+
+systemctl enable postgresql
+service postgresql start
+
+echo "Creating admin username/password"
+psql -At -U postgres -c "CREATE ROLE ${XT_ROLE} WITH NOLOGIN; CREATE ROLE ${XT_ADMIN} WITH PASSWORD '${XT_ADMIN_PASS}' SUPERUSER CREATEDB CREATEROLE LOGIN IN ROLE ${XT_ROLE};" 1> /dev/null 2> /dev/null
+
+echo "Allowing through firewall..."
+firewall-cmd --new-zone=xtuple-db --permanent
+firewall-cmd --reload
+firewall-cmd --zone=xtuple-db --add-source=172.16.80.1/21 --permanent
+firewall-cmd --zone=xtuple-db --add-service=postgresql --permanent
+firewall-cmd --reload
+
+echo "Listen on all ip addresses..."
+echo  "
+listen_addresses = '*'"  >> /var/lib/pgsql/data/postgresql.conf
+
+service postgresql restart
+
+#finished. output the info....
+echo ""
+echo "Finished!"
+echo ""
+echo "PostgreSQL version $PG_VER on port $PG_PORT"
+echo ""
+echo "Local postgres account password: $POSTGRES_ACCTPASSWORD"
