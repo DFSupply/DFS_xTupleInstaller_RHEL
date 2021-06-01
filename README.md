@@ -2,11 +2,15 @@
 Installs the PostgreSQL requirements to support xTuple on RHEL 8  
 
 Requirements:
-- Red Hat Enterprise Linux 8.x
+- RHEL 8.x based server
+  - Red Hat Enterprise Linux 8.x
+  - CentOS Stream 8.x
+  - Rocky Linux 8.3RC1+
+  - Fedora 34
 - Root or Sudo permissions
 
 Will Compile/Install:
-- PostgreSQL 10/12/13
+- PostgreSQL 10/12/13 (based on configuration PG_VER)
 - plv8 2.3.15
 
 Configure the following variables in install.sh prior to running:

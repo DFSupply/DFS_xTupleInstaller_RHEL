@@ -5,11 +5,10 @@
 # DF Supply, Inc.
 # 05/27/2021
 
-# WARNING NOT FINISHED!!!!
-# DO NOT USE IN PRODUCTION
+# DO NOT USE IN PRODUCTION WITHOUT PRIOR TESTING
 #
 # Requires:
-# Red Hat Enterprise Linux 8.x
+# RHEL 8.x
 #
 # Built for RHEL 8 by Scott D Moore @ DF Supply - scott@dfsupplyinc.com
 # Parts of this script are based on the work of Perry Clark @ xTuple - pclark@xtuple.com
@@ -20,20 +19,31 @@
 
 if [[ $(id -u) -ne 0 ]]
 	then
-		echo "Please run this script as root or sudo... Exit.";
-		exit 1;
+		echo "Please run this script as root or sudo... Exit."
+		exit 1
 fi
 
-if grep -q -i "Red Hat Enterprise Linux release 8" /etc/redhat-release
-	then
-		echo "running RHEL 8.x";
-	else
-		echo "Only Red Hat 8.x supported at this time.";
-		exit 1;
+if grep -q -i "Red Hat Enterprise Linux release 8" /etc/redhat-release; then
+	echo "running RHEL 8.x"
+	OS_VER="RHEL8"
+elif grep -q -i "Rocky Linux release 8" /etc/redhat-release; then
+	echo "running Rocky Linux 8.x"
+	OS_VER="ROCKY8"
+elif grep -q -i "CentOS Stream release 8" /etc/redhat-release; then
+	echo "running CentOS Stream 8.x"
+	OS_VER="COSTR8"
+elif grep -q -i "Fedora release 34" /etc/redhat-release; then
+	echo "running Fedora 34"
+	OS_VER="FED34"
+else
+	echo "Unsupported OS. See README for tested distributions."
+	OS_VER="UNSUP"
+	exit 1
 fi
 
 
-# 10, 12, and 13 available in official REPO as of 5/27/2021
+# 10, 12, and 13 available in 8.4+
+# 10 & 12 availabe in 8.3+
 PG_VER="13"
 PG_PORT="5434"
 XT_ROLE="xtrole"
@@ -60,19 +70,39 @@ fi
 echo "Switching PostgreSQL streams and installing..."
 yum update -y
 yum module reset postgresql -y
-yum module enable postgresql:${PG_VER} -y
-yum install postgresql postgresql-server postgresql-devel postgresql-server-devel postgresql-contrib -y
+yum module enable postgresql:${PG_VER} -y || exit
+yum install postgresql postgresql-server postgresql-devel postgresql-server-devel postgresql-contrib -y || exit
 
 echo "Initializing..."
 postgresql-setup initdb
 
 
 echo "PLV8 compilation prereqs..."
-subscription-manager repos --enable=codeready-builder-for-rhel-8-x86_64-rpms
+if [ "$OS_VER" == "RHEL8" ]; then
+	subscription-manager repos --enable=codeready-builder-for-rhel-8-x86_64-rpms
+elif [ "$OS_VER" == "COSTR8" ]; then		
+	dnf config-manager --set-enabled powertools
+elif [ "$OS_VER" == "ROCKY8" ]; then		
+	dnf config-manager --set-enabled powertools
+	dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+	yum install snapd -y
+	systemctl enable --now snapd.socket
+	ln -s /var/lib/snapd/snap /snap
+	sleep 5 # wait and make sure snap has come up
+	yum remove cmake -y
+	sleep 2
+	hash -r cmake
+	snap wait system seed.loaded
+	snap install cmake --classic
+	hash -r cmake
+fi
 yum update -y
-yum install git python2 python3 gcc pkg-config ninja-build make ncurses-compat-libs redhat-rpm-config clang cmake llvm-devel libatomic libstdc++ -y
+yum install git python2 python3 gcc pkg-config ninja-build make ncurses-compat-libs redhat-rpm-config clang llvm-devel libatomic libstdc++ -y || exit
+if [ "$OS_VER" != "ROCKY8" ]; then		
+	yum install cmake -y || exit # install repo version of cmake on everything but rocky (its version is too old to build. Latest snap version installed prior.)
+fi
 # need python 2 for compilation
-alternatives --set python /usr/bin/python2
+alternatives --set python /usr/bin/python2 || alternatives --install /usr/bin/python python /usr/bin/python2 1
 
 
 echo "Compiling libcxx..."
