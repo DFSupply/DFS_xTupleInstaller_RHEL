@@ -122,10 +122,7 @@ hostssl    all             postgres        0.0.0.0/0       reject
 hostnossl  all             all             0.0.0.0/0       reject
 hostssl    all             +xtrole         0.0.0.0/0       md5" > /var/lib/pgsql/data/pg_hba.conf
 
-echo "Setting xTuple plv8 configuration in postgresql.conf..."
-echo  "
-max_locks_per_transaction = 256
-plv8.start_proc='xt.js_init'"  >> /var/lib/pgsql/data/postgresql.conf
+
 
 chpasswd <<< "postgres:$POSTGRES_ACCTPASSWORD"
 
@@ -148,6 +145,11 @@ firewall-cmd --reload
 echo "Listen on all ip addresses..."
 echo  "
 listen_addresses = '*'"  >> /var/lib/pgsql/data/postgresql.conf
+
+echo "Setting xTuple plv8 configuration in postgresql.conf..."
+echo  "
+max_locks_per_transaction = 256
+plv8.start_proc='xt.js_init'"  >> /var/lib/pgsql/data/postgresql.conf
 
 service postgresql restart
 
