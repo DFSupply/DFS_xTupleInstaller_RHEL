@@ -60,7 +60,7 @@ echo "Switching PostgreSQL streams and installing..."
 yum update -y
 yum module reset postgresql -y
 yum module enable postgresql:${PG_VER} -y
-yum install postgresql postgresql-server postgresql-devel postgresql-server-devel -y
+yum install postgresql postgresql-server postgresql-devel postgresql-server-devel postgresql-contrib -y
 
 echo "Initializing..."
 postgresql-setup initdb
@@ -108,7 +108,7 @@ make install || exit
 cd ../ || exit
 
 echo "Linking to LD Library..."
-echo "/usr/local/lib/" > /etc/ld.so.conf.d/plv8.conf.d || exit
+echo "/usr/local/lib/" > /etc/ld.so.conf.d/plv8.conf || exit
 ldconfig
 
 echo "Overwriting the pg_hba.conf configuration"
@@ -132,8 +132,11 @@ chpasswd <<< "postgres:$POSTGRES_ACCTPASSWORD"
 systemctl enable postgresql
 service postgresql start
 
-echo "Creating admin username/password"
+echo "Creating admin username/password..."
 psql -At -U postgres -c "CREATE ROLE ${XT_ROLE} WITH NOLOGIN; CREATE ROLE ${XT_ADMIN} WITH PASSWORD '${XT_ADMIN_PASS}' SUPERUSER CREATEDB CREATEROLE LOGIN IN ROLE ${XT_ROLE};" 1> /dev/null 2> /dev/null
+
+echo "Importing Extensions..."
+psql -At -U postgres -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"; CREATE EXTENSION IF NOT EXISTS \"plv8\";"
 
 echo "Allowing through firewall..."
 firewall-cmd --new-zone=xtuple-db --permanent
