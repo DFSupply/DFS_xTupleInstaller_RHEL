@@ -39,6 +39,7 @@ PG_PORT="5434"
 XT_ROLE="xtrole"
 XT_ADMIN="admin"
 XT_ADMIN_PASS="admin"
+XT_AUTHMETHOD="ldap" # Options: local or ldap. Will configure pg_hba for either. May need to change ip restrictions and ldap server location after setup.
 POSTGRES_ACCTPASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -n 1)
 
 
@@ -111,8 +112,19 @@ echo "Linking to LD Library..."
 echo "/usr/local/lib/" > /etc/ld.so.conf.d/plv8.conf || exit
 ldconfig
 
-echo "Overwriting the pg_hba.conf configuration"
-echo  "
+echo "Overwriting the pg_hba.conf configuration..."
+
+if [ "$XT_AUTHMETHOD" == "ldap" ]; then
+	echo '
+local   all             toby                               peer
+local   all             all                                     trust
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5
+host    all     admin   172.16.80.0/21  md5
+host    all     all     172.16.233.0/24 ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"
+host    all             all             172.16.80.0/21              ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"' > /var/lib/pgsql/data/pg_hba.conf
+else
+	echo "
 local      all             postgres                        trust
 local      replication     all                             peer
 host       replication     all             127.0.0.1/32    ident
@@ -121,7 +133,7 @@ host       all             postgres        0.0.0.0/0       reject
 hostssl    all             postgres        0.0.0.0/0       reject
 hostnossl  all             all             0.0.0.0/0       reject
 hostssl    all             +xtrole         0.0.0.0/0       md5" > /var/lib/pgsql/data/pg_hba.conf
-
+fi
 
 
 chpasswd <<< "postgres:$POSTGRES_ACCTPASSWORD"
