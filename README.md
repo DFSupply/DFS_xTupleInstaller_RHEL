@@ -1,5 +1,5 @@
-# DFS_xTupleInstaller_RHEL8
-Installs the PostgreSQL requirements to support xTuple on RHEL 8
+# DFS_xTupleInstaller_RHEL8  
+Installs the PostgreSQL requirements to support xTuple on RHEL 8  
 
 Requirements:
 - Red Hat Enterprise Linux 8.x
@@ -25,11 +25,5 @@ chmod +x install.sh
 ./install.sh
 ```
 
-PostgreSQL will be running on the port you requested.
-You will need to import the plv8 extension that was created.
-```
-psql -U postgres
-=# CREATE EXTENSION plv8;
-=# SELECT plv8_version();
-exit;
-```
+PostgreSQL will be running on the port you requested.  
+plv8 and uuid-ossp extensions will be automatically imported.  
