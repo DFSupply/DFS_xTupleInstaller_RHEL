@@ -163,6 +163,17 @@ echo  "
 max_locks_per_transaction = 256
 plv8.start_proc='xt.js_init'"  >> /var/lib/pgsql/data/postgresql.conf
 
+echo "Binding postgresql to port configured..."
+if [ "$PG_PORT" != "5432" ]; then
+	echo "Configuring selinux to allow postgresql to bind to non-std port"
+	semanage port -a -t postgresql_port_t "$PG_PORT" -p tcp
+	echo "
+port = $PG_PORT"  >> /var/lib/pgsql/data/postgresql.conf
+	
+else
+	echo "Default port. No configuration necessary..."
+fi
+
 service postgresql restart
 
 #finished. output the info....
