@@ -10,11 +10,12 @@ Will Compile/Install:
 - plv8 2.3.15
 
 Configure the following variables in install.sh prior to running:
-- PG_VER
+- PG_VER (tested with 10/12/13)
 - PG_PORT
 - XT_ROLE
 - XT_ADMIN
 - XT_ADMIN_PASS
+- XT_AUTHMETHOD (local/ldap) - configures auth methods in pg_hba for either method. Further configuration may be required.
 
 execute by running:
 ```
