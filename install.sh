@@ -151,7 +151,11 @@ echo "Allowing through firewall..."
 firewall-cmd --new-zone=xtuple-db --permanent
 firewall-cmd --reload
 firewall-cmd --zone=xtuple-db --add-source=172.16.80.1/21 --permanent
+if [ "$PG_PORT" != "5432" ]; then
+	firewall-cmd --zone=xtuple-db --add-port="$PG_PORT/tcp" --permanent
+else
 firewall-cmd --zone=xtuple-db --add-service=postgresql --permanent
+fi
 firewall-cmd --reload
 
 echo "Listen on all ip addresses..."

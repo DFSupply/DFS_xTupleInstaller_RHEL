@@ -27,3 +27,6 @@ chmod +x install.sh
 
 PostgreSQL will be running on the port you requested.  
 plv8 and uuid-ossp extensions will be automatically imported.  
+
+Recommend configuring postgresql.conf using https://pgtune.leopard.in.ua/  
+located at /var/lib/pgsql/data/postgresql.conf
