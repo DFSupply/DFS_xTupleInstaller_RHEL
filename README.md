@@ -7,6 +7,7 @@ Requirements:
   - CentOS Stream 8.x
   - Rocky Linux 8.3RC1+
   - Fedora 34
+  - Oracle Linux 8.x
 - Root or Sudo permissions
 
 Will Compile/Install:
