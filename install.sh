@@ -38,6 +38,9 @@ elif grep -q -i "CentOS Stream release 8" /etc/redhat-release; then
 elif grep -q -i "Fedora release 34" /etc/redhat-release; then
 	echo "running Fedora 34"
 	OS_VER="FED34"
+elif grep -q -i "AlmaLinux release 8" /etc/redhat-release; then
+	echo "running AlmaLinux 8.x"
+	OS_VER="ALMA8"
 else
 	echo "Unsupported OS. See README for tested distributions."
 	OS_VER="UNSUP"
@@ -48,18 +51,18 @@ fi
 # 10, 12, and 13 available in 8.4+
 # 10 & 12 availabe in 8.3+
 PG_VER="13"
-PG_PORT="5434"
+PG_PORT="5432"
 XT_ROLE="xtrole"
 XT_ADMIN="admin"
 XT_ADMIN_PASS="admin"
-XT_AUTHMETHOD="ldap" # Options: local or ldap. Will configure pg_hba for either. May need to change ip restrictions and ldap server location after setup.
+XT_AUTHMETHOD="local" # Options: local or ldap. Will configure pg_hba for either. May need to change ip restrictions and ldap server location after setup.
 POSTGRES_ACCTPASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -n 1)
 
 
 echo "xTuple PostgreSQL Setup Script (for RHEL 8.x systems)"
 echo "DF Supply, Inc."
 echo ""
-echo "PostgreSQL version $PG_VER on port $PG_PORT"
+echo "PostgreSQL version $PG_VER on port $PG_PORT with $XT_AUTHMETHOD authentication"
 echo "$XT_ADMIN / $XT_ADMIN_PASS / $XT_ROLE"
 
 echo ""
@@ -86,6 +89,8 @@ if [ "$OS_VER" == "RHEL8" ]; then
 elif [ "$OS_VER" == "ORCL8" ]; then
 	dnf config-manager --set-enabled ol8_codeready_builder
 elif [ "$OS_VER" == "COSTR8" ]; then		
+	dnf config-manager --set-enabled powertools
+elif [ "$OS_VER" == "ALMA8" ]; then		
 	dnf config-manager --set-enabled powertools
 elif [ "$OS_VER" == "ROCKY8" ]; then		
 	dnf config-manager --set-enabled powertools

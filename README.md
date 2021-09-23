@@ -8,6 +8,7 @@ Requirements:
   - Rocky Linux 8.3RC1+
   - Fedora 34
   - Oracle Linux 8.x
+  - AlmaLinux 8.x
 - Root or Sudo permissions
 
 Will Compile/Install:
