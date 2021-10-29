@@ -83,6 +83,7 @@ if [ "$PG_VER" == "PERC13" ]; then
 	echo "Installing Percona PG v13..."
 	yum install percona-postgresql13-server -y || exit
 	yum install percona-pg_repack13 percona-pgaudit percona-pgbackrest percona-patroni percona-pg-stat-monitor13 percona-pgbouncer percona-pgaudit13_set_user percona-wal2json13 percona-postgresql13-contrib -y || exit
+	yum install postgresql-devel -y || exit
 
 	echo "Initializing..."
 	/usr/pgsql-13/bin/postgresql-13-setup initdb
