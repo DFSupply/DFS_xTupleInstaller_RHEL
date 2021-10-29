@@ -50,7 +50,8 @@ fi
 
 # 10, 12, and 13 available in 8.4+
 # 10 & 12 availabe in 8.3+
-PG_VER="13"
+# support for PERCONA PG13 using "PERC13"
+PG_VER="PERC13"
 PG_PORT="5432"
 XT_ROLE="xtrole"
 XT_ADMIN="admin"
@@ -73,14 +74,31 @@ if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
 	exit 1
 fi
 
-echo "Switching PostgreSQL streams and installing..."
-yum update -y
-yum module reset postgresql -y
-yum module enable postgresql:${PG_VER} -y || exit
-yum install postgresql postgresql-server postgresql-devel postgresql-server-devel postgresql-contrib -y || exit
+if [ "$PG_VER" == "PERC13" ]; then
+	echo "Installing Percona Release Utility..."
+	yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm -y || exit
+	dnf module disable postgresql rust-toolset llvm-toolset -y || exit
+	percona-release setup ppg-13 -y || exit
+	
+	echo "Installing Percona PG v13..."
+	yum install percona-postgresql13-server -y || exit
+	yum install percona-pg_repack13 percona-pgaudit percona-pgbackrest percona-patroni percona-pg-stat-monitor13 percona-pgbouncer percona-pgaudit13_set_user percona-wal2json13 percona-postgresql13-contrib -y || exit
 
-echo "Initializing..."
-postgresql-setup initdb
+	echo "Initializing..."
+	/usr/pgsql-13/bin/postgresql-13-setup initdb
+
+else
+	echo "Switching PostgreSQL streams and installing..."
+	yum update -y
+	yum module reset postgresql -y
+	yum module enable postgresql:${PG_VER} -y || exit
+	yum install postgresql postgresql-server postgresql-devel postgresql-server-devel postgresql-contrib -y || exit
+	
+	echo "Initializing..."
+	postgresql-setup initdb
+fi
+
+
 
 
 echo "PLV8 compilation prereqs..."
@@ -178,8 +196,13 @@ fi
 
 chpasswd <<< "postgres:$POSTGRES_ACCTPASSWORD"
 
-systemctl enable postgresql
-service postgresql start
+if [ "$PG_VER" == "PERC13" ]; then
+	systemctl enable postgresql-13
+	service postgresql-13 start
+else
+	systemctl enable postgresql
+	service postgresql start
+fi
 
 echo "Creating admin username/password..."
 psql -At -U postgres -c "CREATE ROLE ${XT_ROLE} WITH NOLOGIN; CREATE ROLE ${XT_ADMIN} WITH PASSWORD '${XT_ADMIN_PASS}' SUPERUSER CREATEDB CREATEROLE LOGIN IN ROLE ${XT_ROLE};" 1> /dev/null 2> /dev/null
@@ -218,7 +241,11 @@ else
 	echo "Default port. No configuration necessary..."
 fi
 
-service postgresql restart
+if [ "$PG_VER" == "PERC13" ]; then
+	service postgresql-13 restart
+else
+	service postgresql restart
+fi
 
 #finished. output the info....
 echo ""

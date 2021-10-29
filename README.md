@@ -1,5 +1,5 @@
 # DFS_xTupleInstaller_RHEL8  
-Installs the PostgreSQL requirements to support xTuple on RHEL 8  
+Installs the PostgreSQL requirements to support xTuple database on RHEL 8  
 
 Requirements:
 - RHEL 8.x based server
@@ -12,11 +12,13 @@ Requirements:
 - Root or Sudo permissions
 
 Will Compile/Install:
-- PostgreSQL 10/12/13 (based on configuration PG_VER)
+- PostgreSQL
+  - Official Release 10/12/13 (based on configuration PG_VER)
+  - Percona PostgreSQL 13 (PERC13) [only tested on Red Hat Enterprise Linux 8.x]
 - plv8 2.3.15
 
 Configure the following variables in install.sh prior to running:
-- PG_VER (tested with 10/12/13)
+- PG_VER (tested with 10/12/13/PERC13)
 - PG_PORT
 - XT_ROLE
 - XT_ADMIN
