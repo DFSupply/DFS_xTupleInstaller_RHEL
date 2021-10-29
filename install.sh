@@ -86,6 +86,9 @@ if [ "$PG_VER" == "PERC13" ]; then
 
 	echo "Initializing..."
 	/usr/pgsql-13/bin/postgresql-13-setup initdb
+	
+	echo "Adding Percona PG location to PATH"
+	export PATH="$PATH:/usr/pgsql-13/bin/"
 
 else
 	echo "Switching PostgreSQL streams and installing..."
