@@ -91,6 +91,7 @@ if [ "$PG_VER" == "PERC13" ]; then
 	echo "Adding Percona PG location to PATH"
 	export PATH="$PATH:/usr/pgsql-13/bin/"
 
+	PG_DATA_PATH="/var/lib/pgsql/13/data/"
 else
 	echo "Switching PostgreSQL streams and installing..."
 	yum update -y
@@ -100,6 +101,7 @@ else
 	
 	echo "Initializing..."
 	postgresql-setup initdb
+	PG_DATA_PATH="/var/lib/pgsql/data/"
 fi
 
 
@@ -184,17 +186,18 @@ host    all             all             127.0.0.1/32            md5
 host    all             all             ::1/128                 md5
 host    all     admin   172.16.80.0/21  md5
 host    all     all     172.16.233.0/24 ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"
-host    all             all             172.16.80.0/21              ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"' > /var/lib/pgsql/data/pg_hba.conf
+host    all             all             172.16.80.0/21              ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"' > "${PG_DATA_PATH}pg_hba.conf"
 else
 	echo "
 local      all             postgres                        trust
 local      replication     all                             peer
 host       replication     all             127.0.0.1/32    ident
 host       replication     all             ::1/128         ident
+host    all     admin   172.16.80.0/21  md5
 host       all             postgres        0.0.0.0/0       reject
 hostssl    all             postgres        0.0.0.0/0       reject
 hostnossl  all             all             0.0.0.0/0       reject
-hostssl    all             +xtrole         0.0.0.0/0       md5" > /var/lib/pgsql/data/pg_hba.conf
+hostssl    all             +xtrole         0.0.0.0/0       md5" > "${PG_DATA_PATH}pg_hba.conf"
 fi
 
 
@@ -218,28 +221,30 @@ echo "Allowing through firewall..."
 firewall-cmd --new-zone=xtuple-db --permanent
 firewall-cmd --reload
 firewall-cmd --zone=xtuple-db --add-source=172.16.80.1/21 --permanent
+firewall-cmd --zone=xtuple-db --add-source=172.16.64.1/21 --permanent
 if [ "$PG_PORT" != "5432" ]; then
 	firewall-cmd --zone=xtuple-db --add-port="$PG_PORT/tcp" --permanent
 else
-firewall-cmd --zone=xtuple-db --add-service=postgresql --permanent
+	firewall-cmd --zone=xtuple-db --add-service=postgresql --permanent
 fi
+
 firewall-cmd --reload
 
 echo "Listen on all ip addresses..."
 echo  "
-listen_addresses = '*'"  >> /var/lib/pgsql/data/postgresql.conf
+listen_addresses = '*'"  >> "${PG_DATA_PATH}postgresql.conf"
 
 echo "Setting xTuple plv8 configuration in postgresql.conf..."
 echo  "
 max_locks_per_transaction = 256
-plv8.start_proc='xt.js_init'"  >> /var/lib/pgsql/data/postgresql.conf
+plv8.start_proc='xt.js_init'"  >> "${PG_DATA_PATH}postgresql.conf"
 
 echo "Binding postgresql to port configured..."
 if [ "$PG_PORT" != "5432" ]; then
 	echo "Configuring selinux to allow postgresql to bind to non-std port"
 	semanage port -a -t postgresql_port_t "$PG_PORT" -p tcp
 	echo "
-port = $PG_PORT"  >> /var/lib/pgsql/data/postgresql.conf
+port = $PG_PORT"  >> "${PG_DATA_PATH}postgresql.conf"
 	
 else
 	echo "Default port. No configuration necessary..."
