@@ -131,6 +131,11 @@ elif [ "$OS_VER" == "ROCKY8" ]; then
 	hash -r cmake
 fi
 yum update -y
+if [ "$OS_VER" == "RHEL8" ]; then
+	yum module enable llvm-toolset:rhel8 -y || exit
+elif [ "$OS_VER" == "ORCL8" ]; then		
+	yum module enable llvm-toolset:ol8 -y || exit
+fi
 yum install git python2 python3 gcc pkg-config ninja-build make ncurses-compat-libs redhat-rpm-config clang llvm-devel libatomic libstdc++ -y || exit
 if [ "$OS_VER" != "ROCKY8" ]; then		
 	yum install cmake -y || exit # install repo version of cmake on everything but rocky (its version is too old to build. Latest snap version installed prior.)
@@ -166,8 +171,8 @@ make install || exit
 cd ../../../ || exit
 
 echo "Compiling PLV8..."
-git clone -b v2.3.15 https://github.com/plv8/plv8.git plv8-2.3.15
-cd plv8-2.3.15 || exit
+git clone -b v3.0.0 https://github.com/plv8/plv8.git plv8-3.0.0
+cd plv8-3.0.0 || exit
 make || exit
 make install || exit
 cd ../ || exit
