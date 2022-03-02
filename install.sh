@@ -190,6 +190,7 @@ local   all             all                                     trust
 host    all             all             127.0.0.1/32            md5
 host    all             all             ::1/128                 md5
 host    all     admin   172.16.80.0/21  md5
+host    all     admin   172.16.64.0/21  md5
 host    all     all     172.16.233.0/24 ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"
 host    all             all             172.16.80.0/21              ldap ldapserver=172.16.80.244 ldapprefix="NETWORK\"' > "${PG_DATA_PATH}pg_hba.conf"
 else
@@ -199,6 +200,7 @@ local      replication     all                             peer
 host       replication     all             127.0.0.1/32    ident
 host       replication     all             ::1/128         ident
 host    all     admin   172.16.80.0/21  md5
+host    all     admin   172.16.64.0/21  md5
 host       all             postgres        0.0.0.0/0       reject
 hostssl    all             postgres        0.0.0.0/0       reject
 hostnossl  all             all             0.0.0.0/0       reject
@@ -227,6 +229,7 @@ firewall-cmd --new-zone=xtuple-db --permanent
 firewall-cmd --reload
 firewall-cmd --zone=xtuple-db --add-source=172.16.80.1/21 --permanent
 firewall-cmd --zone=xtuple-db --add-source=172.16.64.1/21 --permanent
+firewall-cmd --zone=xtuple-db --add-source=172.16.233.0/24 --permanent
 if [ "$PG_PORT" != "5432" ]; then
 	firewall-cmd --zone=xtuple-db --add-port="$PG_PORT/tcp" --permanent
 else
