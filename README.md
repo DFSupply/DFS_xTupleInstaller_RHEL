@@ -38,4 +38,5 @@ PostgreSQL will be running on the port you requested.
 plv8 and uuid-ossp extensions will be automatically imported.  
 
 Recommend configuring postgresql.conf using https://pgtune.leopard.in.ua/  
-located at /var/lib/pgsql/data/postgresql.conf
+located at /var/lib/pgsql/data/postgresql.conf  
+Sample file provided (that we utilize internally): postgresql.conf
