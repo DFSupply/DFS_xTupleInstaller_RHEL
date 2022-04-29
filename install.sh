@@ -92,6 +92,10 @@ if [ "$PG_VER" == "PERC13" ]; then
 	export PATH="$PATH:/usr/pgsql-13/bin/"
 
 	PG_DATA_PATH="/var/lib/pgsql/13/data/"
+	
+	echo "Setting up Percona Monitoring..."
+	percona-release enable pmm2-client || exit
+	yum install pmm2-client -y || exit
 else
 	echo "Switching PostgreSQL streams and installing..."
 	yum update -y
