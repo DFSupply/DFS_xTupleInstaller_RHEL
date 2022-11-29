@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# RHEL8 xTuple Installer
+# RHEL8/9 xTuple Installer
 #
 # DF Supply, Inc.
 # 05/27/2021
@@ -8,9 +8,9 @@
 # DO NOT USE IN PRODUCTION WITHOUT PRIOR TESTING
 #
 # Requires:
-# RHEL 8.x
+# RHEL 8.x or RHEL 9.x
 #
-# Built for RHEL 8 by Scott D Moore @ DF Supply - scott@dfsupplyinc.com
+# Built for RHEL 8/9 by Scott D Moore @ DF Supply - scott@dfsupplyinc.com
 # Parts of this script are based on the work of Perry Clark @ xTuple - pclark@xtuple.com
 #
 # Notes:
@@ -29,6 +29,9 @@ if grep -q -i "Oracle Linux Server release 8" /etc/oracle-release; then
 elif grep -q -i "Red Hat Enterprise Linux release 8" /etc/redhat-release; then
 	echo "running RHEL 8.x"
 	OS_VER="RHEL8"
+elif grep -q -i "Red Hat Enterprise Linux release 9" /etc/redhat-release; then
+	echo "running RHEL 9.x"
+	OS_VER="RHEL9"
 elif grep -q -i "Rocky Linux release 8" /etc/redhat-release; then
 	echo "running Rocky Linux 8.x"
 	OS_VER="ROCKY8"
@@ -60,7 +63,7 @@ XT_AUTHMETHOD="local" # Options: local or ldap. Will configure pg_hba for either
 POSTGRES_ACCTPASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -n 1)
 
 
-echo "xTuple PostgreSQL Setup Script (for RHEL 8.x systems)"
+echo "xTuple PostgreSQL Setup Script (for RHEL 8.x & 9.x systems)"
 echo "DF Supply, Inc."
 echo ""
 echo "PostgreSQL version $PG_VER on port $PG_PORT with $XT_AUTHMETHOD authentication"
@@ -114,6 +117,8 @@ fi
 echo "PLV8 compilation prereqs..."
 if [ "$OS_VER" == "RHEL8" ]; then
 	subscription-manager repos --enable=codeready-builder-for-rhel-8-x86_64-rpms
+elif [ "$OS_VER" == "RHEL9" ]; then
+	subscription-manager repos --enable=codeready-builder-for-rhel-9-x86_64-rpms
 elif [ "$OS_VER" == "ORCL8" ]; then
 	dnf config-manager --set-enabled ol8_codeready_builder
 elif [ "$OS_VER" == "COSTR8" ]; then		
@@ -137,6 +142,8 @@ fi
 yum update -y
 if [ "$OS_VER" == "RHEL8" ]; then
 	yum module enable llvm-toolset:rhel8 -y || exit
+elif [ "$OS_VER" == "RHEL9" ]; then
+	yum module enable llvm-toolset:rhel9 -y || exit
 elif [ "$OS_VER" == "ORCL8" ]; then		
 	yum module enable llvm-toolset:ol8 -y || exit
 fi
